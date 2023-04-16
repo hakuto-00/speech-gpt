@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script class="manual-link" src="https://cdn.tailwindcss.com"></script>
+    <link class="manual-link" href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.3/flowbite.min.css" rel="stylesheet" />
+    <script class="manual-link" src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.3/flowbite.min.js"></script>
+    <script class="manual-link" src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <title>SpeachGPT</title>
+    <style id="out-style">
+      .ellipsis-animation {
+        white-space: nowrap;
+        overflow: hidden;        
+        animation: ellipsis-animation 1s infinite;
+      }
+      /*点滅させる*/
+      @keyframes ellipsis-animation {
+        from {
+          width: 0;
+        }
+        to {
+          width: 3em;
+        }
+      }
+      ol{
+        padding-left: 1.5rem !important;
+        list-style-type: decimal !important;
+      }
+      ul{
+        padding-left: 1.5rem !important;
+        list-style-type: disc !important;
+      }
+      li{
+        margin: 0.5rem 0 !important;
+      }
+      .chat-text p{
+        margin-bottom: 1rem !important;
+      }
+      .fixed {
+        transition: transform 0.3s ease;
+      }
+
+      .header-hidden {
+        transform: translateY(-100%);
+      }
+
+      .header-visible {
+        transform: translateY(0);
+      }
+
+    </style>
+</head>
+
+<body>
+  <header class="fixed top-0 w-full z-50 bg-gray-800 py-4" id="header">
+    <nav class="px-9 mx-auto flex justify-between items-center">
+      <a href="#" class="text-xl text-white font-bold">SpeachGPT</a>
+      <button class="md:hidden" id="menu-toggle">
+        <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+          <path fill-rule="evenodd" d="M3 9h14a1 1 0 0 1 0 2H3a1 1 0 0 1 0-2zm0-4h14a1 1 0 0 1 0 2H3a1 1 0 1 1 0-2zm0 8h14a1 1 0 0 1 0 2H3a1 1 0 1 1 0-2z" clip-rule="evenodd"></path>
+        </svg>
+      </button>
+      <div class="flex gap-7 items-center">
+        <a href="https://github.com/hakuto-00/speach-gpt" target="_blank" id="twitter-btn" class="text-white hover:text-gray-200 focus:outline-none" data-is-option="0">
+          <svg class="svg-inline--fa fa-github fa-w-16 fa-fw w-[24px] h-[24px] inline-block" data-class="fab" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="github" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" data-fa-i2svg="" width="21" height="16.7969"><!--Font Awesome Free by @fontawesome - https://fontawesome.comLicense - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)--><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+        </a>
+        <a href="https://twitter.com/hakuto00" target="_blank" id="twitter-btn" class="text-blue-400 hover:text-gray-200 focus:outline-none" data-is-option="0">
+          <svg class="svg-inline--fa fa-twitter fa-w-16 fa-fw w-[24px] h-[24px] inline-block" data-class="fab" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="twitter" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" width="21" height="16.7969"><!--Font Awesome Free by @fontawesome - https://fontawesome.comLicense - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)--><path fill="currentColor" d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+        </a>
+        <button id="option-btn" class="text-white hover:text-gray-200 focus:outline-none" data-is-option="0">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-[24px] h-[24px] inline-block">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </button>
+        <button id="set-api-key-btn" data-modal-show="keyModal" data-modal-toggle="keyModal" class="inline-flex items-center rounded-md shadow-sm px-4 py-2 bg-teal-500 text-white hover:bg-teal-600 focus:outline-none">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-4 h-4 mr-2 -ml-1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"></path>
+          </svg>        
+          API Key
+        </button>
+      </div>
+    </nav>
+
+    <div class="hidden flex-wrap items-center gap-6 px-9 py-3 xl:h-[0px] xl:py-0 xl:flex overflow-hidden option-area">
+      <button data-modal-show="botModal" data-modal-toggle="botModal" class="p-1 rounded-1 bg-teal-500 text-white hover:bg-teal-700">
+        <svg class="h-5 w-5 svg-inline--fa fa-robot fa-w-20 fa-fw" data-class="fas" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="robot" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg="" width="21" height="16.7969">
+          <!--Font Awesome Free by @fontawesome - https://fontawesome.comLicense - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)--><path fill="currentColor" d="M0 256v128c0 17.7 14.3 32 32 32h32V224H32c-17.7 0-32 14.3-32 32zM464 96H352V32c0-17.7-14.3-32-32-32s-32 14.3-32 32v64H176c-44.2 0-80 35.8-80 80v272c0 35.3 28.7 64 64 64h320c35.3 0 64-28.7 64-64V176c0-44.2-35.8-80-80-80zM256 416h-64v-32h64v32zm-32-120c-22.1 0-40-17.9-40-40s17.9-40 40-40 40 17.9 40 40-17.9 40-40 40zm128 120h-64v-32h64v32zm96 0h-64v-32h64v32zm-32-120c-22.1 0-40-17.9-40-40s17.9-40 40-40 40 17.9 40 40-17.9 40-40 40zm192-72h-32v192h32c17.7 0 32-14.3 32-32V256c0-17.7-14.3-32-32-32z"/>
+        </svg>
+      </button>
+      <div>
+        <label for="bot-language-select" class="text-white">読み上げる言語：</label>
+        <select class="p-2" id="bot-language-select">
+          <option value="en-US">英語 (米国)</option>
+          <option value="en-GB">英語 (イギリス)</option>
+          <option value="fr-FR">フランス語</option>
+          <option value="es-ES">スペイン語</option>
+          <option value="de-DE">ドイツ語</option>
+          <option value="it-IT">イタリア語</option>
+          <option value="ja-JP">日本語</option>
+          <option value="ko-KR">韓国語</option>
+          <option value="zh-CN">中国語 (簡体字)</option>
+          <option value="zh-TW">中国語 (繁体字)</option>
+        </select>
+      </div>
+      <div class="hidden">
+        <label for="voice-select" class="text-white">音声：</label>
+        <select class="p-2" id="voice-select"></select>
+      </div>
+      <div>
+        <label for="rate-select" class="text-white">話す速さ：</label>
+        <select class="p-2" id="rate-select">
+          <option value="0.25">0.25</option>
+          <option value="0.5">0.5</option>
+          <option value="0.75">0.75</option>
+          <option value="1.0" selected>標準</option>
+          <option value="1.25">1.25</option>
+          <option value="1.5">1.5</option>
+          <option value="1.5">1.75</option>
+          <option value="2.0">2</option>
+        </select>
+      </div>
+      <div class="flex items-center mr-4">
+        <label class="inline-flex items-center" for="mute-check">
+          <input type="checkbox" id="mute-check" class="form-checkbox h-5 w-5 text-blue-600">
+          <span class="ml-2 text-white">ミュートにする</span>
+        </label>
+      </div>
+      
+    </div>
+  </header>
+  
+
+    <div class="w-full p-5 mt-[5rem]">
+      <div id="chat-area">
+      </div>
+    </div>
+
+    <div class="text-center hidden" id="stop-button-area">
+      <button class="rounded-md shadow-sm px-4 py-2 bg-teal-500 text-white hover:bg-teal-500 focus:outline-none" id="stop-button">
+        停止
+      </button>
+    </div>
+    <div class="w-full h-[5rem]" id="chat-area-offset"></div>
+    <div class="fixed bottom-0 left-0 right-0 p-4">
+      <div class="flex">
+        <textarea id="chat-input" placeholder="「Enter」キーで確定します" class="w-full h-16 rounded-lg border-gray-300 border-2 px-4 py-2 resize-none h-[44px] max-h-[200px] min-h-[44px] focus:border focus:border-teal-500"></textarea>
+        <button class="ml-2 p-2 hover:bg-gray-200 " id="mic-button">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+          </svg>
+        </button>
+      </div>
+      <div class="mt-3 flex flex-wrap items-center gap-6 bg-gray-800 px-5 py-3 xl:h-[0px] xl:py-0 xl:flex hidden overflow-hidden option-area">
+        <div class="p-1 rounded-1 bg-indigo-500 text-white">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
+          </svg>
+        </div>
+
+        <div>
+          <label for="user-language-select" class="text-white">マイクに話す言語：</label>
+          <select class="p-2" id="user-language-select">
+            <option value="en-US">英語 (米国)</option>
+            <option value="en-GB">英語 (イギリス)</option>
+            <option value="fr-FR">フランス語</option>
+            <option value="es-ES">スペイン語</option>
+            <option value="de-DE">ドイツ語</option>
+            <option value="it-IT">イタリア語</option>
+            <option value="ja-JP" selected>日本語</option>
+            <option value="ko-KR">韓国語</option>
+            <option value="zh-CN">中国語 (簡体字)</option>
+            <option value="zh-TW">中国語 (繁体字)</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-1">
+          <label for="delay-select" class="text-white">話した後</label>
+          <select class="p-2" id="delay-select">
+            <option value="500">すぐ</option>
+            <option value="1000" selected>1秒後</option>
+            <option value="2000">2秒後</option>
+            <option value="3000">3秒後</option>
+            <option value="4000">4秒後</option>
+            <option value="5000">5秒後</option>
+          </select>
+          <p class="text-white">に送信する</p>
+        </div>
+        <div class="flex items-center mr-4">
+          <label class="inline-flex items-center" for="off-mic-check">
+            <input type="checkbox" id="off-mic-check" class="form-checkbox h-5 w-5 text-blue-600">
+            <span class="ml-2 text-white">マイクを使用しない</span>
+          </label>
+        </div>
+        <button id="delete-conversation-btn" class="inline-flex items-center rounded-md shadow-sm px-4 py-2 bg-red-500 hidden text-white hover:bg-red-600 focus:outline-none ms-auto">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-4 h-4 mr-2 -ml-1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z"></path>
+          </svg>          
+          会話を削除
+        </button>
+
+      </div>
+    </div>
+
+
+    <!-- chat template -->
+    <div class="hidden" id="chat-template">
+      <div id="chat-user" class="flex items-start gap-1 p-5 align-items-center bg-gray-100 chat-block chat-user">
+        <div class="p-1 rounded-1 bg-indigo-500 text-white">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
+          </svg>
+        </div>
+        <div class="btn-speech mt-0.5">
+          <button class="btn-play p-1 hover:text-teal-700">
+            <svg class="svg-inline--fa fa-volume-up fa-w-18 fa-fw" data-class="fas" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="volume-up" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg="" width="21" height="16.7969">
+              <!--Font Awesome Free by @fontawesome - https://fontawesome.comLicense - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)-->
+              <path fill="currentColor" d="M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zm233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95-7.34 11.17-4.22 26.18 6.95 33.51 66.27 43.49 105.82 116.6 105.82 195.58 0 78.98-39.55 152.09-105.82 195.58-11.17 7.32-14.29 22.34-6.95 33.5 7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97zM480 256c0-63.53-32.06-121.94-85.77-156.24-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36 6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256zm-141.77-76.87c-11.58-6.33-26.19-2.16-32.61 9.45-6.39 11.61-2.16 26.2 9.45 32.61C327.98 228.28 336 241.63 336 256c0 14.38-8.02 27.72-20.92 34.81-11.61 6.41-15.84 21-9.45 32.61 6.43 11.66 21.05 15.8 32.61 9.45 28.23-15.55 45.77-45 45.77-76.88s-17.54-61.32-45.78-76.86z"/>
+            </svg>
+          </button>
+          <button class="btn-pause hidden p-1 hover:text-teal-600">
+            <svg class="svg-inline--fa fa-volume-mute fa-w-16 fa-fw" data-class="fas" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="volume-mute" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" width="21" height="16.7969">
+              <!--Font Awesome Free by @fontawesome - https://fontawesome.comLicense - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)-->
+              <path fill="currentColor" d="M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zM461.64 256l45.64-45.64c6.3-6.3 6.3-16.52 0-22.82l-22.82-22.82c-6.3-6.3-16.52-6.3-22.82 0L416 210.36l-45.64-45.64c-6.3-6.3-16.52-6.3-22.82 0l-22.82 22.82c-6.3 6.3-6.3 16.52 0 22.82L370.36 256l-45.63 45.63c-6.3 6.3-6.3 16.52 0 22.82l22.82 22.82c6.3 6.3 16.52 6.3 22.82 0L416 301.64l45.64 45.64c6.3 6.3 16.52 6.3 22.82 0l22.82-22.82c6.3-6.3 6.3-16.52 0-22.82L461.64 256z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="chat-text mt-0.5 ml-2"></div>
+
+      </div>
+
+      <div id="chat-bot" class="flex items-start gap-1 p-5 bg-gray-200 chat-block chat-bot">
+        <button data-modal-show="botModal" data-modal-toggle="botModal" class="p-1 rounded-1 bg-teal-500 text-white hover:bg-teal-700 show-bot-modal">
+          <svg class="h-5 w-5 svg-inline--fa fa-robot fa-w-20 fa-fw" data-class="fas" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="robot" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg="" width="21" height="16.7969">
+            <!--Font Awesome Free by @fontawesome - https://fontawesome.comLicense - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)--><path fill="currentColor" d="M0 256v128c0 17.7 14.3 32 32 32h32V224H32c-17.7 0-32 14.3-32 32zM464 96H352V32c0-17.7-14.3-32-32-32s-32 14.3-32 32v64H176c-44.2 0-80 35.8-80 80v272c0 35.3 28.7 64 64 64h320c35.3 0 64-28.7 64-64V176c0-44.2-35.8-80-80-80zM256 416h-64v-32h64v32zm-32-120c-22.1 0-40-17.9-40-40s17.9-40 40-40 40 17.9 40 40-17.9 40-40 40zm128 120h-64v-32h64v32zm96 0h-64v-32h64v32zm-32-120c-22.1 0-40-17.9-40-40s17.9-40 40-40 40 17.9 40 40-17.9 40-40 40zm192-72h-32v192h32c17.7 0 32-14.3 32-32V256c0-17.7-14.3-32-32-32z"/>
+          </svg>
+        </button>
+  
+        <div class="btn-speech mt-0.5">
+          <button class="btn-play p-1 hover:text-teal-500">
+
+            <svg class="svg-inline--fa fa-volume-up fa-w-18 fa-fw" data-class="fas" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="volume-up" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg="" width="21" height="16.7969">
+              <!--Font Awesome Free by @fontawesome - https://fontawesome.comLicense - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)-->
+              <path fill="currentColor" d="M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zm233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95-7.34 11.17-4.22 26.18 6.95 33.51 66.27 43.49 105.82 116.6 105.82 195.58 0 78.98-39.55 152.09-105.82 195.58-11.17 7.32-14.29 22.34-6.95 33.5 7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97zM480 256c0-63.53-32.06-121.94-85.77-156.24-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36 6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256zm-141.77-76.87c-11.58-6.33-26.19-2.16-32.61 9.45-6.39 11.61-2.16 26.2 9.45 32.61C327.98 228.28 336 241.63 336 256c0 14.38-8.02 27.72-20.92 34.81-11.61 6.41-15.84 21-9.45 32.61 6.43 11.66 21.05 15.8 32.61 9.45 28.23-15.55 45.77-45 45.77-76.88s-17.54-61.32-45.78-76.86z"/>
+            </svg>
+          </button>
+          <button class="btn-pause hidden p-1 hover:text-teal-600">
+            <svg class="svg-inline--fa fa-volume-mute fa-w-16 fa-fw" data-class="fas" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="volume-mute" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" width="21" height="16.7969">
+              <!--Font Awesome Free by @fontawesome - https://fontawesome.comLicense - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)-->
+              <path fill="currentColor" d="M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zM461.64 256l45.64-45.64c6.3-6.3 6.3-16.52 0-22.82l-22.82-22.82c-6.3-6.3-16.52-6.3-22.82 0L416 210.36l-45.64-45.64c-6.3-6.3-16.52-6.3-22.82 0l-22.82 22.82c-6.3 6.3-6.3 16.52 0 22.82L370.36 256l-45.63 45.63c-6.3 6.3-6.3 16.52 0 22.82l22.82 22.82c6.3 6.3 16.52 6.3 22.82 0L416 301.64l45.64 45.64c6.3 6.3 16.52 6.3 22.82 0l22.82-22.82c6.3-6.3 6.3-16.52 0-22.82L461.64 256z"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="chat-text mt-0.5 ml-2 ellipsis-animation"></div>
+        
+      </div>
+    </div>
+
+    <!-- api key modal -->
+    <div id="keyModal" tabindex="-1" aria-hidden="true"
+        class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full">
+        <div class="relative w-[350px] h-full max-w-2xl md:h-auto">
+            <!-- Modal content -->
+            <div class="relative rounded-lg shadow bg-gray-200 max-h-[400px] overflow-scroll">
+                <!-- Modal header -->
+                <div class="flex items-start justify-between px-4 py-2 border-b rounded-t">
+                  <h3 class="text-xl font-semibold text-gray-900">
+                    ChatGPT APIキー
+                  </h3>
+                  <button type="button"
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
+                    data-modal-hide="keyModal">
+                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                  </button>
+                </div>
+                <!-- Modal body -->
+                <div class="p-6 space-y-6">
+                  <div class="text-end">
+                    <a href="https://platform.openai.com/account/api-keys" target="_blank" class="text-indigo-600 hover:text-indigo-900 text-end">ChatGPTのAPIキーを取得する</a>
+                  </div>
+                  <input type="password" id="api-key-input" placeholder="APIキーを入力してください" class="border-gray-300 block w-full p-2.5 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm">
+                  <button id="save-api-key-btn" data-modal-hide="keyModal" type="button" class="w-full inline-flex justify-center rounded-md shadow-sm  py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                    </svg>
+                    保存
+                  </button>
+                  <!-- apiキーを取得するためのリンクを貼る -->
+                  <div class="flex p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+                    <svg aria-hidden="true" class="flex-shrink-0 inline w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                    <span class="sr-only">Info</span>
+                    <div>
+                      <span class="font-medium">APIキーはブラウザのLocalStorageに保存されます。</span><button id="clear-api-key-btn" type="button" class="hidden text-red-200 hover:text-indigo-900">APIキーを削除する</button>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+    <!-- bot roll modal -->
+    <div id="botModal" tabindex="-1" aria-hidden="true"
+        class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full">
+        <div class="relative w-[100%] h-full max-w-2xl md:h-auto">
+            <!-- Modal content -->
+            <div class="relative rounded-lg shadow bg-gray-200 max-h-[400px] overflow-scroll">
+                <!-- Modal header -->
+                <div class="flex items-start justify-between px-4 py-2 border-b rounded-t">
+                  <h3 class="text-xl font-semibold text-gray-900">
+                    チャットの目的、BOTのキャラクター等を入力してください
+                  </h3>
+                  <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center close-bot-modal">
+                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                  </button>
+                </div>
+                <!-- Modal body -->
+                <div class="p-6 space-y-6">
+                  <textarea id="bot-input" rows="4" placeholder="BOTの役割を入力してください" class="border-gray-300 block w-full p-2.5 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"></textarea>
+                  <button id="save-bot-btn" type="button" class="w-full inline-flex justify-center rounded-md shadow-sm  py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none close-bot-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                    </svg>
+                    保存
+                  </button>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+
+    <script id="js-section">
+      const setApiKeyButton = document.getElementById('set-api-key-btn');
+      const apiKeyInput = document.getElementById('api-key-input');
+      const botInput = document.getElementById('bot-input');
+      const saveApiKeyButton = document.getElementById('save-api-key-btn');
+      const clearApiKeyButton = document.getElementById('clear-api-key-btn');
+      const saveBotButton = document.getElementById('save-bot-btn');
+      const optionButton = document.getElementById('option-btn');
+      const deleteButton = document.getElementById('delete-conversation-btn');
+      const botLanguageSelect = document.getElementById('bot-language-select');
+      const userLanguageSelect = document.getElementById('user-language-select');
+      const rateSelect = document.getElementById('rate-select');
+      const delaySelect = document.getElementById('delay-select');
+      const voiceSelect = document.getElementById('voice-select');
+      const chatInput = document.getElementById('chat-input');
+      const micButton = document.getElementById('mic-button');
+      const stopButtonArea = document.getElementById('stop-button-area');
+      const stopButton = document.getElementById('stop-button');
+      const offMicCheck = document.getElementById('off-mic-check');
+      const muteCheck = document.getElementById('mute-check');
+      const chatArea = document.getElementById('chat-area');
+      const chatBlocks = document.querySelectorAll(".chat-block");
+      const header = document.getElementById('header');
+
+      const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new speechRecognition();
+      const synth = window.speechSynthesis;
+
+      let isRecognizing = false;
+      let abortController = new AbortController();
+      let lastScroll = 0;
+
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+
+
+
+      setTimeout(() => {
+        botLanguageSelect.dispatchEvent(new Event('change'));
+        //localStorageから設定を読み込む
+        botLanguageSelect.value = localStorage.getItem('bot_language') || 'ja-JP';
+        rateSelect.value = localStorage.getItem('rate') || '1.0';
+        muteCheck.checked = localStorage.getItem('mute') === 'true';
+
+        userLanguageSelect.value = localStorage.getItem('user_language') || 'ja-JP';
+        delaySelect.value = localStorage.getItem('delay') || '1000';
+        offMicCheck.checked = localStorage.getItem('offMic') === 'true';
+
+        apiKeyInput.value = localStorage.getItem('chatgpt_api_key');
+        if (apiKeyInput.value) {
+          clearApiKeyButton.classList.remove('hidden');
+        }
+        botInput.value = localStorage.getItem('bot_system');
+
+        offMicCheck.dispatchEvent(new Event('change'));
+        readChatContents();
+      }, 10);
+
+
+      async function slideDown(element) {
+        return new Promise(resolve => {
+          element.style.overflow = "hidden";
+          const startHeight = element.clientHeight;
+          element.style.height = "auto";
+          const endHeight = element.clientHeight;
+          element.style.height = `${startHeight}px`;
+          setTimeout(() => {
+            element.style.transition = `height 0.5s`;
+            element.style.height = `${endHeight}px`;
+            resolve();
+          }, 1);
+        });
+      }
+
+
+      async function slideUp(element) {
+        return new Promise(resolve => {
+          const startHeight = element.clientHeight;
+          element.style.height = `${startHeight}px`;
+          setTimeout(() => {
+            element.style.transition = `height 0.5s`;
+            element.style.height = '0px';
+            element.style.overflow = 'hidden';
+            resolve();
+          }, 1);
+        });
+      }
+
+
+
+      //chatGPTにメッセージを送信する
+      const sendChat = (text, chatgptApiKey) => {
+
+
+        const endPoint = "https://api.openai.com/v1/chat/completions";
+        const modelName = "gpt-3.5-turbo";
+        // const modelName = "text-davinci-003";
+
+        const messages = [
+          {
+            role: "system",
+            content: `markdown形式で返してください。役割:${botInput.value}`
+          }
+        ];
+        //文脈を理解させるために、botの最新のメッセージを取得
+        const latesText = getLatestChat('bot');
+        if (latesText) {
+          messages.push({
+            role: "assistant",
+            content: latesText
+          });
+        }
+
+        messages.push({
+          role: "user",
+          content: `${text} `
+        });
+
+        micButton.disabled = true;
+        stopButtonArea.classList.remove('hidden');
+        //受信中のメッセージを追加
+        addChat("・・・",'bot');
+
+        const requestOptions = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${chatgptApiKey}`
+          },
+          body: JSON.stringify({
+            model: modelName,
+            messages: messages,
+            temperature: 0.9,
+            max_tokens: 700
+          })
+        };
+
+        const myRequest = new Request(endPoint, requestOptions);
+
+        const myTimeout = 120000; // 2分
+        const elemSpeeches = document.querySelectorAll('#chat-area .btn-speech');
+
+        const timeoutId = setTimeout(() => {
+            togglePlayPauseButton(elemSpeeches[elemSpeeches.length - 1],false);
+            abortController.abort();
+            abortController = new AbortController();
+        }, myTimeout);
+
+        fetch(myRequest, { signal: abortController.signal })
+          .then(res => res.json())
+          .then(json => {
+            clearTimeout(timeoutId);
+            micButton.disabled = false;
+            stopButtonArea.classList.add('hidden');
+
+            //メッセージを更新
+            const chat = json.choices[0].message.content;
+            updateLatestChat(chat.trim());
+
+            if (muteCheck.checked){
+              const elemSpeeches = document.querySelectorAll('#chat-area .btn-speech');
+              togglePlayPauseButton(elemSpeeches[elemSpeeches.length - 1],false);
+              return;
+            }
+
+            //サウンドアイコンを変更
+            resetPlayPauseButton(false);
+            togglePlayPauseButton(elemSpeeches[elemSpeeches.length - 1],true);
+            //スピーチ開始
+            startSpeech(chat, () => {
+              // 音声合成が終わるとイベント発火し、再び音声認識を開始する関数を呼び出す
+              togglePlayPauseButton(elemSpeeches[elemSpeeches.length - 1],false);
+              if (offMicCheck.checked==false) startRecognition();
+              saveChatContents();
+            });
+          })
+          .catch(err => {
+            micButton.disabled = false;
+            stopButtonArea.classList.add('hidden');
+
+            clearTimeout(timeoutId);
+            if (err.name === 'AbortError') {
+              updateLatestChat(`<span style="color: red">リクエストが中止されました。しばらくしてからもう一度お試しください。</span>`);
+            }else{
+              updateLatestChat(`<span style="color: red">${err.message}</span>`);
+            }
+            togglePlayPauseButton(elemSpeeches[elemSpeeches.length - 1],false);
+          });
+
+      }
+
+      //チャット内容を追加
+      const addChat = (text,role) => {
+
+        const chat = document.getElementById(`chat-${role}`).cloneNode(true);
+        const chatText = chat.querySelector('.chat-text');
+
+
+        chatText.innerHTML = marked.parse(text);
+        chat.removeAttribute('id');
+        if (muteCheck.checked){
+          chat.querySelector('.btn-speech').classList.add('hidden');
+        }
+        chatArea.appendChild(chat);
+        //スクロールを最下部に移動
+        window.scrollTo(0,document.body.scrollHeight);
+
+        return true;
+      }
+
+      //最新のチャット内容を更新
+      const updateLatestChat = (text) => {
+        const chatTexts = chatArea.querySelectorAll('.chat-text');
+
+        //クラス名がchat-textの最後の要素を取得
+        const latestChat = chatTexts[chatTexts.length-1];
+        latestChat.innerHTML = marked.parse(text);
+        //ellipsis-animationクラスを削除
+        latestChat.classList.remove('ellipsis-animation');
+
+        //スクロールを最下部に移動
+        window.scrollTo(0,document.body.scrollHeight);
+      }
+
+      //最新のチャット内容を取得
+      const getLatestChat = (role) => {
+        const chatTexts = chatArea.querySelectorAll(`.chat-${role}`);
+
+        //クラス名がchat-textの最後の要素を取得
+        if (chatTexts.length === 0) return '';
+        const LatestChat = chatTexts[chatTexts.length-1];
+        return LatestChat.querySelector('.chat-text').textContent;
+      }
+
+      const validateInput = () => {
+        if (!speechRecognition) {
+          alert('このブラウザでは音声認識がサポートされていません。');
+          return false;
+        }
+        if (!apiKeyInput.value) {
+          alert('APIキーが設定されていません。');
+          return false;
+        }
+
+
+        return true;
+
+      }
+
+      //音声認識を開始する
+      const startRecognition = () => {
+        if (!validateInput()) return;
+
+        recognition.lang = userLanguageSelect.value;
+        recognition.start();
+
+      }
+
+      //音声認識を停止する
+      const stopRecognition = () => {
+        isRecognizing = false;
+        micButton.classList.remove('text-red-500');
+        recognition.stop();
+      }
+
+      //textareaの高さを自動調整する
+      const autoExpand = () => {
+        chatInput.style.height = chatInput.clientHeight + 'px';
+        chatInput.style.height = chatInput.scrollHeight + 'px';
+        if (chatInput.scrollHeight > 200) {
+          chatInput.style.overflowY = 'scroll';
+        } else {
+          chatInput.style.overflowY = 'hidden';
+        }
+      }
+
+      //再生、一時停止ボタンの表示切り替え
+      const togglePlayPauseButton = (elem,isPlay) => {
+        if (isPlay) {
+          elem.querySelector('.btn-play').classList.add('hidden');
+          elem.querySelector('.btn-pause').classList.remove('hidden');
+        } else {
+          elem.querySelector('.btn-play').classList.remove('hidden');
+          elem.querySelector('.btn-pause').classList.add('hidden');
+        }
+      }
+
+      //音声再生アイコンの一括表示切り替え
+      const resetPlayPauseButton = (isPlay) => {
+        const elemSpeeches = chatArea.querySelectorAll('.btn-speech');
+        elemSpeeches.forEach(elemSpeech => {
+          if (elemSpeech.querySelector('.btn-play').classList.contains('hidden') == isPlay) return;
+          togglePlayPauseButton(elemSpeech,isPlay);
+          return;
+        });
+      }
+
+      //音声再生アイコンエリアの一括表示切り替え
+      const toggleSpeechButton = (isShow) => {
+          chatArea.querySelectorAll('.btn-speech').forEach(btn => {
+            if (isShow) {
+              btn.classList.remove('hidden');
+            } else {
+              btn.classList.add('hidden');
+            }
+          });
+      }
+
+
+      //音声合成を開始
+      const startSpeech = (speechText,callback) => {
+        // メッセージを音声合成するためのオブジェクトを作成し、言語と速度を指定
+        const utterance = new SpeechSynthesisUtterance(speechText);
+
+        utterance.lang = botLanguageSelect.value;
+        utterance.rate = rateSelect.value;
+
+        // 音声合成のためのSynthesisオブジェクトを生成し、セレクトボックスの声を設定
+        utterance.voice = synth.getVoices().find(voice => voice.name === voiceSelect.value);
+        // 音声合成を実行
+        synth.cancel();
+        synth.speak(utterance);
+        
+        utterance.onend = event => {
+          if(callback) callback(event);
+        };
+        utterance.onpause = event => {
+          if(callback) callback(event);
+        };
+        utterance.onerror = event => {
+          if(callback) callback(event);
+        };
+      }
+      //チャット内容をIndexedDBから読み込む
+      const readChatContents = () => {
+        const request = indexedDB.open('chatgpt', 1);
+        request.onupgradeneeded = event => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains('chat')) {
+            db.createObjectStore('chat', { keyPath: 'id' });
+          }
+        };
+        request.onsuccess = event => {
+          const db = event.target.result;
+          const transaction = db.transaction(['chat'], 'readonly');
+          const store = transaction.objectStore('chat');
+
+          // 全てのオブジェクトストアからデータを取得するために開始・終了キーを指定しないcursorを生成
+          const cursorRequest = store.openCursor();
+          cursorRequest.onsuccess = (event) => {
+            const cursor = event.target.result;
+            if (cursor) {
+              const chatData = cursor.value.data;
+              chatData.forEach(chatText => {
+                chatArea.insertAdjacentHTML('beforeend',chatText);
+              });
+
+              cursor.continue();
+            } else {
+              //スクロールを最下部に移動
+              window.scrollTo(0,document.body.scrollHeight);
+            }
+          };
+
+          request.onerror = event => {
+            console.log('読み込みに失敗しました');
+          }
+        }
+      }
+
+
+
+
+
+      // チャット内容をIndexedDBに保存する
+      const saveChatContents = () => {
+        setTimeout(() => {
+          const chatTexts = Array.from(chatArea.querySelectorAll('.chat-block'));
+          const chatTextsArray = [];
+          chatTexts.forEach(chat => {
+            if (chatTextsArray.length >= 200) return;
+            chatTextsArray.push(chat.outerHTML);
+          });
+
+          const request = indexedDB.open('chatgpt', 1);
+          request.onsuccess = event => {
+            const db = event.target.result;
+            const transaction = db.transaction(['chat'], 'readwrite');
+            const store = transaction.objectStore('chat');
+
+            // 削除処理
+            const deleteRequest = store.delete('chat');
+            deleteRequest.onerror = event => console.error('failed to delete chat data from IndexedDB');
+
+            // 追加処理
+            const addRequest = store.add({id: 'chat', data: chatTextsArray}); // キーを指定して追加する
+            addRequest.onerror = event => console.error('failed to save chat data to IndexedDB');
+          }
+        }, 100);
+      };
+
+      //apiキーを保存
+      saveApiKeyButton.addEventListener('click', () => {
+        localStorage.setItem('chatgpt_api_key', apiKeyInput.value);
+        clearApiKeyButton.classList.remove('hidden');
+      });
+
+      //apiキーを削除
+      clearApiKeyButton.addEventListener("click", () => {
+        localStorage.removeItem("chatgpt_api_key");
+        clearApiKeyButton.classList.add('hidden');
+        apiKeyInput.value = "";
+        apiKeyInput.focus();
+      });
+
+      saveBotButton.addEventListener('click', () => {
+        localStorage.setItem('bot_system', botInput.value);
+      });
+
+      //チャット入力時
+      chatInput.addEventListener('input', autoExpand);
+      chatInput.addEventListener('keydown', (event) => {
+        if (micButton.disabled) return;
+
+        //Enterキーが押されたらチャットを送信。Shiftキーが押されている場合は改行
+        if (event.keyCode === 13 && !event.shiftKey) {
+          if (!validateInput()) return;
+          event.preventDefault();
+          if (optionButton.dataset.isOption == 1) {
+            optionButton.click();
+          }
+          addChat(chatInput.value.trim(),'user');
+          sendChat(chatInput.value.trim(),apiKeyInput.value);
+          chatInput.value='';
+          stopRecognition();
+          //スクロールを最下部に移動
+          window.scrollTo(0,document.body.scrollHeight);
+        }
+      });
+
+
+      //音声認識ボタンが押されたら、音声認識を開始
+      micButton.addEventListener('click', () => {
+        if (isRecognizing) {
+          stopRecognition();
+        } else {
+          startRecognition();
+        }
+
+      });
+
+      //音声認識の結果が返ってきたら、テキストエリアに設定し、2秒後にチャットを送信
+      let micTimeoutId;
+      recognition.addEventListener('result', (event) => {
+        if (!isRecognizing) return;
+
+        let transcript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+          if (!event.results[i].isFinal) {
+            transcript += ' ';
+          }
+        }
+
+        chatInput.value = transcript;
+        clearTimeout(micTimeoutId);
+        micTimeoutId = setTimeout(() => {
+          if (!isRecognizing) return;
+          if (optionButton.dataset.isOption == 1) {
+            optionButton.click();
+          }
+          addChat(chatInput.value.trim(),'user');
+          sendChat(chatInput.value.trim(),apiKeyInput.value);
+          chatInput.value='';
+          stopRecognition();
+        }, delaySelect.value);
+
+
+      });
+
+      //音声認識が開始されたら、マイクボタンの色を変更
+      recognition.addEventListener('audiostart', () => {
+        isRecognizing = true;
+        micButton.classList.add('text-red-500');
+      });
+
+
+      // 言語が選択されたら、該当する音声を取得してセレクトボックスに追加
+      botLanguageSelect.addEventListener("change", () => {
+        localStorage.setItem('bot_language', botLanguageSelect.value);
+
+        // 音声一覧をクリア
+        voiceSelect.innerHTML = "";
+        voiceSelect.parentElement.classList.remove("hidden");
+
+        // 音声一覧を取得してセレクトボックスに追加(一度、getVoices()を実行しないと、音声一覧が取得できない
+        const voices=speechSynthesis.getVoices();
+        setTimeout(() => {
+          speechSynthesis.getVoices().forEach(voice => {
+            if (voice.lang.startsWith(botLanguageSelect.value)) {
+              const option = document.createElement("option");
+              option.text = voice.name;
+              option.value = voice.name;
+              if (localStorage.getItem('voice') == voice.name) {
+                option.selected = true;
+              }
+              voiceSelect.add(option);
+            }
+          });
+        }, 100);
+      });
+
+      // 動的に追加された要素にイベントを追加
+      document.addEventListener("click",async function(event) {
+        //音声再生ボタンが押されたら、音声合成を開始
+        if (event.target.closest(".btn-play")) {
+          //ボタンのアイコンを変更
+          resetPlayPauseButton(false);
+          togglePlayPauseButton(event.target.closest(".btn-speech"),true);
+
+          //特定の要素でマウスで選択されたテキストを取得
+          let text = '';
+          const selection = window.getSelection();
+          const targetText=event.target.closest(".chat-block").querySelector(".chat-text").textContent;
+          if(!selection.baseNode){
+            text = targetText;
+          }else if (targetText.indexOf(selection.baseNode.textContent)>=0) {
+            text = selection.toString() || targetText;
+          }else{
+            text = targetText;
+          }
+
+          //再生ボタンが押されたら、音声合成を開始
+          if (!text) return;
+          startSpeech(text, () => {
+            //音声合成が終了したら、アイコンを変える
+            togglePlayPauseButton(event.target.closest(".btn-speech"),false);
+          });
+
+        //音声一時停止ボタンが押されたら、音声合成を停止
+        } else if (event.target.closest(".btn-pause")) {
+          //ボタンのアイコンを変更
+          togglePlayPauseButton(event.target.closest(".btn-speech"),false);
+
+          //一時停止ボタンが押されたら、音声合成を停止
+          synth.cancel();
+
+
+        //botアイコンをクリックしたらモーダル表示
+        } else if (event.target.closest(".show-bot-modal")) {
+          const modal = document.getElementById("botModal");
+          new Modal(modal).show();
+
+        //モーダル非表示
+        } else if (event.target.closest(".close-bot-modal")) {
+          const modal = document.getElementById("botModal");
+          new Modal(modal).hide();
+          const backdrop = document.querySelector('[modal-backdrop]');
+          backdrop.remove();
+        }
+      });
+
+      //オプションボタンを押したら、オプションクラスの表示を切り替え
+      optionButton.addEventListener("click", () => {
+
+        document.querySelectorAll(".option-area").forEach(async option => {
+          if (window.innerWidth < 1024) {
+            //スマホ対応
+            option.style.height = '';
+            option.classList.toggle("hidden");
+            return;
+          }
+
+          if (optionButton.dataset.isOption == 0) {
+            option.classList.remove("xl:py-0");
+            option.classList.add("xl:py-3");
+            await slideDown(option);
+          } else {
+            await slideUp(option);
+            option.classList.add("xl:py-0");
+            option.classList.remove("xl:py-3");
+          }
+
+          //会話が存在したら削除ボタン表示
+          if (chatArea.querySelector(".chat-block")) {
+            deleteButton.classList.remove("hidden");
+          }else{
+            deleteButton.classList.add("hidden");
+          }
+
+        });
+
+        //値をトグルする
+        optionButton.dataset.isOption = +!+optionButton.dataset.isOption;
+
+      });
+
+      //マイクオフのチェックボックスが変更されたら、音声認識を停止
+      offMicCheck.addEventListener("change", () => {
+        localStorage.setItem("offMic", offMicCheck.checked);
+          //マイクボタン表示・非表示
+        if (offMicCheck.checked) {
+          stopRecognition();
+          micButton.classList.add("hidden");
+        }else{
+          micButton.classList.remove("hidden");
+        }
+      });
+
+      //ミュートにするチェックボックスが変更されたら、音声のボリュームを変更
+      muteCheck.addEventListener("change", () => {
+        localStorage.setItem("mute", muteCheck.checked);
+        toggleSpeechButton(!muteCheck.checked);
+        if (muteCheck.checked) {
+          resetPlayPauseButton(false);
+          synth.cancel();
+          synth.volume = 0;
+        } else {
+          synth.volume = 1;
+        }
+      });
+
+      userLanguageSelect.addEventListener("change", () => {
+        localStorage.setItem('user_language', userLanguageSelect.value);
+      });
+
+      voiceSelect.addEventListener("change", () => {
+        localStorage.setItem('voice', voiceSelect.value);
+      });
+
+      delaySelect.addEventListener("change", () => {
+        localStorage.setItem('delay', delaySelect.value);
+      });
+
+      rateSelect.addEventListener("change", () => {
+        localStorage.setItem('rate', rateSelect.value);
+      });
+
+      stopButton.addEventListener("click", () => {
+        abortController.abort();
+        abortController = new AbortController();
+      });
+
+
+      //会話削除ボタンを押したら、会話を削除
+      deleteButton.addEventListener("click", () => {
+        //確認ダイアログを表示
+        if (!confirm("会話を削除しますか？")) return;
+
+        //indexedDBのデータを削除
+        const request = indexedDB.open('chatgpt', 1);
+        request.onsuccess = event => {
+          const db = event.target.result;
+          const transaction = db.transaction(['chat'], 'readwrite');
+          const store = transaction.objectStore('chat');
+
+          // 削除処理
+          const deleteRequest = store.delete('chat');
+          deleteRequest.onerror = event => console.error('failed to delete chat data from IndexedDB');
+
+        }
+        chatArea.querySelectorAll(".chat-block").forEach(chat => {
+          chat.remove();
+        });
+
+        deleteButton.classList.add("hidden");
+      });
+
+      window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        
+        // スクロール位置が一番上の場合、headerのクラス属性を変更してreturnする
+        if (currentScroll <= 0) {
+          header.classList.add('header-visible');
+          header.classList.remove('header-hidden');
+          return;
+        }
+
+        // スクロール位置が下に移動した場合、headerのクラス属性を変更する
+        if (currentScroll > lastScroll && !header.classList.contains('header-hidden')) {
+          header.classList.add('header-hidden');
+          header.classList.remove('header-visible');
+        } 
+        // スクロール位置が上に戻った場合、headerのクラス属性を変更する
+        else if (currentScroll < lastScroll && header.classList.contains('header-hidden')) {
+          header.classList.add('header-visible');
+          header.classList.remove('header-hidden');
+        }
+
+        // 前回のスクロール位置を更新する
+        lastScroll = currentScroll;
+      });
+
+
+    </script>
+</body>
+
+</html>
